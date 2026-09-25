@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-4 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-headset text-primary me-2"></i> IT Destek Talepleri (Tickets)</h5>
+        <button class="btn btn-primary rounded-pill btn-sm fw-bold" onclick="addTicket()"><i class="fas fa-plus me-1"></i> Yeni Talep</button>
+    </div>
+    <div class="card-body px-4 pb-4">
+        <div class="table-responsive">
+            <table class="table align-middle table-borderless" id="ticketsTable" style="width:100%">
+                <thead style="border-bottom: 2px solid #E2E8F0;">
+                    <tr>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Talep No</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Personel</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Konu</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Öncelik</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Durum</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Tarih</th>
+                        <th class="text-muted fw-bold text-uppercase text-end" style="font-size: 0.75rem;">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tickets %}
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="fw-bold text-primary">{{ t.id }}</td>
+                        <td>
+                            <div class="fw-bold">{{ t.kullanici }}</div>
+                            <div class="small text-muted">{{ t.departman }}</div>
+                        </td>
+                        <td class="fw-semibold">{{ t.konu }}</td>
+                        <td>
+                            {% if t.oncelik == 'Yüksek' %}<span class="badge bg-danger rounded-pill px-3">Yüksek</span>
+                            {% elif t.oncelik == 'Orta' %}<span class="badge bg-warning text-dark rounded-pill px-3">Orta</span>
+                            {% else %}<span class="badge bg-info rounded-pill px-3">Düşük</span>{% endif %}
+                        </td>
+                        <td>
+                            {% if t.durum == 'Açık' %}<span class="badge-soft-danger"><i class="fas fa-circle fa-xs me-1"></i> Açık</span>
+                            {% elif t.durum == 'İşlemde' %}<span class="badge-soft-warning"><i class="fas fa-tools fa-xs me-1"></i> İşlemde</span>
+                            {% else %}<span class="badge-soft-success"><i class="fas fa-check-circle fa-xs me-1"></i> Çözüldü</span>{% endif %}
+                        </td>
+                        <td class="text-muted small fw-semibold">{{ t.tarih }}</td>
+                        <td class="text-end">
+                            {% if t.durum != 'Çözüldü' %}
+                            <button class="btn btn-sm btn-success text-white fw-bold shadow-sm" onclick="resolveTicket('{{ t.id }}')"><i class="fas fa-check me-1"></i> Çöz</button>
+                            {% else %}
+                            <button class="btn btn-sm btn-light text-muted fw-bold" disabled><i class="fas fa-check-double me-1"></i> Çözüldü</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#page-title').text('Destek Sistemi');
+        $('.nav-link[href="/tickets"]').addClass('active');
+        $('#ticketsTable').DataTable({
+            language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json' },
+            pageLength: 10,
+            order: [[5, 'desc']],
+            dom: '<"d-flex justify-content-between align-items-center mb-3"f l>rt<"d-flex justify-content-between align-items-center mt-3"i p>'
+        });
+        
+        // Random ticket generator simulation
+        const users = ["Hasan YILMAZ", "Zeynep ÇELİK", "Ahmet KAYA", "Fatma DEMİR", "Mehmet ÖZ"];
+        const depts = ["Pazarlama", "Muhasebe", "Üretim", "İnsan Kaynakları", "Satış"];
+        const issues = ["Yazıcıdan çıktı alamıyorum", "İnternet bağlantım çok yavaş", "Mausumun tekerleği bozuldu", "Excel lisansım dolmuş uyarı veriyor", "Bilgisayarım kendi kendine kapanıyor"];
+        
+        function triggerRandomTicket() {
+            // 20% chance every 15 seconds to create a ticket
+            if(Math.random() < 0.20) {
+                let u = users[Math.floor(Math.random()*users.length)];
+                let d = depts[Math.floor(Math.random()*depts.length)];
+                let i = issues[Math.floor(Math.random()*issues.length)];
+                
+                $.post('/create_random_ticket', {kullanici: u, departman: d, konu: i}, function(res) {
+                    if(res.success) {
+                        const Toast = Swal.mixin({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 6000,
+                            timerProgressBar: true
+                        });
+                        Toast.fire({
+                            icon: 'info',
+                            title: 'Yeni Destek Talebi!',
+                            text: u + ' (' + d + ') : ' + i
+                        }).then(() => {
+                            // Sadece sayfayı yenileyerek yeni veriyi tabloya yansıtıyoruz
+                            location.reload();
+                        });
+                    }
+                });
+            }
+        }
+        
+        // Start simulation
+        setInterval(triggerRandomTicket, 15000);
+    });
+    
+    function resolveTicket(id) {
+        Swal.fire({
+            title: 'Talebi Kapat',
+            text: id + " numaralı talebi 'Çözüldü' olarak işaretlemek istiyor musunuz?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Evet, Çözüldü',
+            cancelButtonText: 'İptal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/resolve_ticket/' + encodeURIComponent(id), function(res) {
+                    if(res.success) {
+                        Swal.fire('Başarılı!', 'Talep başarıyla kapatıldı.', 'success').then(() => {
+                            location.reload();
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function addTicket() {
+        Swal.fire({
+            title: 'Yeni Destek Talebi Aç',
+            html: `
+                <input id="tk-user" class="swal2-input" placeholder="Kullanıcı Adı (Örn: Ali Yılmaz)">
+                <input id="tk-konu" class="swal2-input" placeholder="Sorun / Talep Özeti">
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Talep Aç',
+            cancelButtonText: 'İptal',
+            confirmButtonColor: '#4f46e5',
+            preConfirm: () => {
+                if(!document.getElementById('tk-konu').value) Swal.showValidationMessage('Lütfen konuyu giriniz!');
+                return {
+                    kullanici: document.getElementById('tk-user').value || 'Misafir Kullanıcı',
+                    konu: document.getElementById('tk-konu').value
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/add_ticket', result.value, function(res) {
+                    Swal.fire('Talep Oluşturuldu', 'IT ekibine bildirim gönderildi.', 'success').then(() => location.reload());
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}

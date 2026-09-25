@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-4 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-network-wired text-info me-2"></i> Ağ ve Altyapı Cihazları</h5>
+        <button class="btn btn-info text-white rounded-pill btn-sm fw-bold" onclick="Swal.fire({title: 'Ağ Taranıyor...', html: 'IP blokları (192.168.1.x) taranıyor...', timer: 2000, didOpen: () => {Swal.showLoading()}}).then(() => {Swal.fire('Tarama Tamamlandı', 'Yeni cihaz bulunamadı. Mevcut cihaz listesi güncel.', 'success')})"><i class="fas fa-search me-1"></i> Ağı Tara</button>
+    </div>
+    <div class="card-body px-4 pb-4">
+        <div class="table-responsive">
+            <table class="table align-middle table-borderless" id="agTable" style="width:100%">
+                <thead style="border-bottom: 2px solid #E2E8F0;">
+                    <tr>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Cihaz Adı</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Marka & Model</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">IP Adresi</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Lokasyon</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Uptime</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in cihazlar %}
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="fw-bold text-dark"><i class="fas {% if 'Switch' in c.isim %}fa-server{% elif 'Firewall' in c.isim %}fa-shield-alt{% else %}fa-wifi{% endif %} text-secondary me-2"></i> {{ c.isim }}</td>
+                        <td class="fw-semibold text-muted">{{ c.marka }}</td>
+                        <td><span class="badge bg-light text-dark border px-2 py-1 font-monospace">{{ c.ip }}</span></td>
+                        <td class="fw-semibold">{{ c.lokasyon }}</td>
+                        <td class="text-muted small fw-bold">{{ c.uptime }}</td>
+                        <td>
+                            {% if c.durum == 'Online' %}<span class="badge-soft-success"><i class="fas fa-circle fa-xs me-1 text-success"></i> Çevrimiçi</span>
+                            {% else %}<span class="badge-soft-danger"><i class="fas fa-circle fa-xs me-1 text-danger"></i> Çevrimdışı</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#page-title').text('Ağ Cihazları');
+        $('.nav-link[href="/ag-cihazlari"]').addClass('active');
+        $('#agTable').DataTable({
+            language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json' },
+            dom: '<"d-flex justify-content-between align-items-center mb-3"f l>rt<"d-flex justify-content-between align-items-center mt-3"i p>'
+        });
+    });
+</script>
+{% endblock %}

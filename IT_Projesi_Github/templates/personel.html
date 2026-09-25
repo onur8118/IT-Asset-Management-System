@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-4 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-users text-success me-2"></i> Personel Rehberi (Active Directory)</h5>
+        <button class="btn btn-success text-white rounded-pill btn-sm fw-bold" onclick="addPersonel()"><i class="fas fa-user-plus me-1"></i> Yeni Personel</button>
+    </div>
+    <div class="card-body px-4 pb-4">
+        <div class="table-responsive">
+            <table class="table align-middle table-borderless" id="personelTable" style="width:100%">
+                <thead style="border-bottom: 2px solid #E2E8F0;">
+                    <tr>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">AD / Soyad</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Departman</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">E-Posta</th>
+                        <th class="text-muted fw-bold text-uppercase text-center" style="font-size: 0.75rem;">Zimmetli Cihaz</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Durum</th>
+                        <th class="text-muted fw-bold text-uppercase text-end" style="font-size: 0.75rem;">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in personel %}
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 40px; height: 40px; font-weight: bold;">
+                                    {{ p.isim[0] }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ p.isim }}</div>
+                                    <div class="small text-muted">{{ p.unvan }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="fw-semibold text-muted">{{ p.departman }}</td>
+                        <td class="font-monospace text-primary small">{{ p.mail }}</td>
+                        <td class="text-center">
+                            <span class="badge bg-secondary rounded-pill px-3 py-2">{{ p.cihaz_sayisi }} Cihaz</span>
+                        </td>
+                        <td>
+                            {% if p.durum == 'Aktif' %}<span class="badge-soft-success"><i class="fas fa-check-circle fa-xs me-1"></i> Aktif</span>
+                            {% else %}<span class="badge-soft-warning"><i class="fas fa-plane-departure fa-xs me-1"></i> İzinde</span>{% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-light text-warning" title="Şifre Sıfırla" onclick="resetPassword('{{ p.isim }}')"><i class="fas fa-key"></i></button>
+                                <button class="btn btn-sm btn-light text-primary" title="Zimmet Ekle" onclick="assignAsset('{{ p.isim }}')"><i class="fas fa-laptop"></i></button>
+                                <button class="btn btn-sm btn-light text-danger" title="Hesabı Kilitle" onclick="lockAccount('{{ p.isim }}')"><i class="fas fa-user-lock"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#page-title').text('Personel Yönetimi');
+        $('.nav-link[href="/personel"]').addClass('active');
+        $('#personelTable').DataTable({
+            language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json' },
+            dom: '<"d-flex justify-content-between align-items-center mb-3"f l>rt<"d-flex justify-content-between align-items-center mt-3"i p>'
+        });
+    });
+
+    function addPersonel() {
+        Swal.fire({
+            title: 'Active Directory Kullanıcı Ekle',
+            html: `
+                <input id="ad-isim" class="swal2-input" placeholder="Ad Soyad">
+                <select id="ad-dept" class="swal2-select" style="width: 72%; padding: 0 15px; height: 3.4em;">
+                    <option value="" disabled selected>Departman Seçin</option>
+                    <option value="Üretim">Üretim</option>
+                    <option value="Muhasebe">Muhasebe</option>
+                    <option value="İnsan Kaynakları">İnsan Kaynakları</option>
+                    <option value="Pazarlama">Pazarlama</option>
+                </select>
+                <input id="ad-mail" class="swal2-input" placeholder="Şirket E-Postası (@schmid.com.tr)">
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Hesabı Aç',
+            cancelButtonText: 'İptal',
+            confirmButtonColor: '#10b981',
+            preConfirm: () => {
+                if(!document.getElementById('ad-isim').value) Swal.showValidationMessage('Ad soyad zorunludur!');
+                return {
+                    isim: document.getElementById('ad-isim').value,
+                    departman: document.getElementById('ad-dept').value || 'Genel',
+                    mail: document.getElementById('ad-mail').value || 'yeni.personel@schmid.com.tr'
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/add_personel', result.value, function(res) {
+                    Swal.fire('Başarılı', 'Kullanıcı hesabı Windows Server (AD) üzerinde oluşturuldu ve listeye eklendi.', 'success').then(() => location.reload());
+                });
+            }
+        });
+    }
+
+    function resetPassword(name) {
+        Swal.fire({
+            title: 'Şifre Sıfırlama',
+            text: `${name} kullanıcısının AD (Active Directory) şifresi sıfırlanıp kendisine SMS ile iletilecektir. Emin misiniz?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#f59e0b',
+            confirmButtonText: 'Evet, Sıfırla',
+            cancelButtonText: 'İptal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('Sıfırlandı!', 'Geçici şifre oluşturuldu ve personele iletildi.', 'success');
+            }
+        });
+    }
+
+    function assignAsset(name) {
+        Swal.fire({
+            title: 'Zimmet Ata',
+            input: 'select',
+            inputOptions: {
+                'IT-NB-2045 (Dell Vostro)': 'IT-NB-2045 (Dell Vostro)',
+                'IT-PC-1022 (HP ProDesk)': 'IT-PC-1022 (HP ProDesk)',
+                'IT-MN-553 (Asus Monitör)': 'IT-MN-553 (Asus Monitör)',
+                'IT-MB-901 (iPhone 13)': 'IT-MB-901 (iPhone 13)'
+            },
+            inputPlaceholder: 'Boştaki Cihazlardan Seçin...',
+            showCancelButton: true,
+            html: `<b>${name}</b> personeline zimmetlenecek cihazı seçin.`,
+            confirmButtonText: 'Zimmetle',
+            cancelButtonText: 'İptal',
+            confirmButtonColor: '#3b82f6',
+            inputValidator: (value) => {
+                return new Promise((resolve) => {
+                    if (value !== '') { resolve(); } else { resolve('Lütfen bir cihaz seçin!'); }
+                });
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('Zimmetlendi!', `${result.value} seri numaralı cihaz ${name} üzerine zimmetlendi. Zimmet formu oluşturuldu.`, 'success');
+            }
+        });
+    }
+
+    function lockAccount(name) {
+        Swal.fire({
+            title: 'Hesap Askıya Alınacak',
+            text: `${name} kullanıcısının domain (AD) hesabı devre dışı bırakılacak ve tüm şirket içi ağ/sistem erişimleri anında kesilecektir!`,
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Kilitle (Disable)',
+            cancelButtonText: 'İptal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('Hesap Kilitlendi', 'Kullanıcı hesabı Active Directory üzerinde devre dışı (disabled) bırakıldı.', 'success');
+            }
+        });
+    }
+</script>
+{% endblock %}

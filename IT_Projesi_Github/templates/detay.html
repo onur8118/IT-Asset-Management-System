@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/" class="btn btn-sm mb-3" style="background: #E2E8F0; color: #475569; border-radius: 8px; font-weight: 600;">
+        <i class="fas fa-arrow-left me-1"></i> Listeye Dön
+    </a>
+</div>
+
+<!-- Hero Profile Section -->
+<div class="card border-0 shadow-sm mb-5" style="border-radius: 1.5rem; overflow: hidden;">
+    <div style="height: 120px; background: linear-gradient(135deg, var(--primary) 0%, #3B82F6 100%);"></div>
+    <div class="card-body px-5 pb-5 position-relative text-center text-md-start d-md-flex align-items-end" style="margin-top: -60px;">
+        <img src="https://ui-avatars.com/api/?name={{ ad_soyad|urlencode }}&background=ffffff&color=4F46E5&rounded=true&bold=true&size=120" 
+             class="border border-4 border-white shadow-sm" alt="Profile" style="border-radius: 50%; width: 120px; height: 120px;">
+        
+        <div class="ms-md-4 mt-3 mt-md-0">
+            <h2 class="fw-bolder text-dark mb-1">{{ ad_soyad }}</h2>
+            <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 mt-2">
+                <span class="badge-soft-primary"><i class="fas fa-building me-1"></i> {{ sirket }}</span>
+                <span class="badge-soft-danger"><i class="fas fa-map-marker-alt me-1"></i> {{ lokasyon }}</span>
+                <span class="badge-soft-success"><i class="fas fa-boxes me-1"></i> {{ cihazlar|length }} Cihaz Zimmetli</span>
+            </div>
+        </div>
+        
+        <div class="ms-md-auto mt-4 mt-md-0">
+            <button class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="window.location.href='/ekle'"><i class="fas fa-plus me-1"></i> Yeni Cihaz Ata</button>
+        </div>
+    </div>
+</div>
+
+<h5 class="fw-bold mb-4 text-dark"><i class="fas fa-laptop-house text-primary me-2"></i> Zimmetli Cihaz Detayları</h5>
+
+<div class="row g-4">
+    {% for cihaz in cihazlar %}
+    <div class="col-xl-4 col-md-6">
+        <div class="card h-100 border-0 shadow-sm" style="border-radius: 1.25rem; transition: transform 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+            
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="avatar" style="width: 50px; height: 50px; 
+                        {% if cihaz.kategori == 'Laptop' %}background: #E0E7FF; color: #4F46E5;
+                        {% elif cihaz.kategori == 'Masaüstü' %}background: #E0F2FE; color: #0284C7;
+                        {% elif cihaz.kategori == 'Monitör' %}background: #FEF3C7; color: #D97706;
+                        {% elif cihaz.kategori == 'Cep Telefonu' %}background: #DCFCE7; color: #16A34A;
+                        {% elif cihaz.kategori == 'Masa Telefonu' %}background: #F3E8FF; color: #9333EA;
+                        {% else %}background: #F1F5F9; color: #475569;{% endif %}">
+                        
+                        {% if cihaz.kategori == 'Laptop' %}<i class="fas fa-laptop fs-4"></i>
+                        {% elif cihaz.kategori == 'Masaüstü' %}<i class="fas fa-desktop fs-4"></i>
+                        {% elif cihaz.kategori == 'Monitör' %}<i class="fas fa-tv fs-4"></i>
+                        {% elif cihaz.kategori == 'Cep Telefonu' %}<i class="fas fa-mobile-alt fs-4"></i>
+                        {% elif cihaz.kategori == 'Masa Telefonu' %}<i class="fas fa-phone-alt fs-4"></i>
+                        {% elif cihaz.kategori == 'Klavye/Fare' %}<i class="fas fa-mouse fs-4"></i>
+                        {% else %}<i class="fas fa-box fs-4"></i>{% endif %}
+                    </div>
+                    <span class="badge bg-light text-secondary border px-2 py-1"><i class="fas fa-barcode"></i> {{ cihaz.barkod_no }}</span>
+                </div>
+                
+                <h5 class="fw-bold text-dark mb-1">{{ cihaz.marka_model }}</h5>
+                <p class="text-muted small fw-semibold mb-4">{{ cihaz.kategori }}</p>
+                
+                <div class="d-flex flex-column gap-2 mb-4">
+                    {% if cihaz.ip_adresi %}
+                    <div class="d-flex align-items-center bg-light p-2 rounded">
+                        <i class="fas fa-network-wired text-success me-3 ms-2"></i>
+                        <div>
+                            <div class="text-xs text-muted" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">IP Adresi</div>
+                            <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ cihaz.ip_adresi }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if cihaz.mac_adresi %}
+                    <div class="d-flex align-items-center bg-light p-2 rounded">
+                        <i class="fas fa-microchip text-secondary me-3 ms-2"></i>
+                        <div>
+                            <div class="text-xs text-muted" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">MAC Adresi</div>
+                            <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ cihaz.mac_adresi }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex align-items-center bg-light p-2 rounded">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=SCH-IT-{{ cihaz.id }}-{{ cihaz.barkod_no }}" alt="QR Code" class="rounded me-3 ms-2 border bg-white p-1" style="width: 45px; height: 45px;" title="Cihaz QR Kodu">
+                        <div>
+                            <div class="text-xs text-muted" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">QR Kod</div>
+                            <div class="fw-bold text-dark" style="font-size: 0.9rem;">{{ cihaz.barkod_no }}</div>
+                        </div>
+                    </div>
+
+                    {% if cihaz.notlar %}
+                    <div class="d-flex align-items-start bg-light p-2 rounded mt-1">
+                        <i class="fas fa-info-circle text-info me-3 ms-2 mt-1"></i>
+                        <div>
+                            <div class="text-xs text-muted" style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">Ek Bilgi</div>
+                            <div class="fw-semibold text-dark small">{{ cihaz.notlar }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card-footer bg-transparent border-top p-3 d-flex justify-content-between align-items-center">
+                <!-- IT Actions Dropdown (Only for Computers) -->
+                {% if cihaz.kategori in ['Laptop', 'Masaüstü'] %}
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light border fw-bold text-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border-radius: 8px;">
+                        <i class="fas fa-terminal me-1"></i> Yönetim
+                    </button>
+                    <ul class="dropdown-menu shadow-sm border-0" style="border-radius: 12px; font-size: 0.85rem; border: 1px solid rgba(0,0,0,0.05) !important;">
+                        <li><h6 class="dropdown-header text-primary fw-bold">Teşhis & Bağlantı</h6></li>
+                        <li><a class="dropdown-item fw-semibold action-ping" href="#" data-cihaz="{{ cihaz.marka_model }}"><i class="fas fa-wifi text-success me-2" style="width: 20px;"></i>Bağlantı Testi (Ping)</a></li>
+                        <li><a class="dropdown-item fw-semibold action-rdp" href="#" data-cihaz="{{ cihaz.marka_model }}"><i class="fas fa-desktop text-primary me-2" style="width: 20px;"></i>Uzak Masaüstü Bağlantısı</a></li>
+                        <li><a class="dropdown-item fw-semibold action-hardware" href="#" data-cihaz="{{ cihaz.marka_model }}"><i class="fas fa-microchip text-dark me-2" style="width: 20px;"></i>Donanım Analizi (RAM/CPU)</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header text-primary fw-bold">Müdahale & Komut</h6></li>
+                        <li><a class="dropdown-item fw-semibold action-software" href="#" data-cihaz="{{ cihaz.marka_model }}"><i class="fas fa-box-open text-primary me-2" style="width: 20px;"></i>Uzaktan Yazılım Yükle</a></li>
+                        <li><a class="dropdown-item fw-semibold action-notify" href="#" data-cihaz="{{ cihaz.marka_model }}"><i class="fas fa-envelope text-warning me-2" style="width: 20px;"></i>Kullanıcıya Ekran Mesajı Gönder</a></li>
+                        <li><a class="dropdown-item fw-semibold action-lock" href="#" data-cihaz="{{ cihaz.marka_model }}"><i class="fas fa-lock text-secondary me-2" style="width: 20px;"></i>Ekranı Anında Kilitle</a></li>
+                        <li><a class="dropdown-item fw-semibold text-danger action-restart" href="#" data-cihaz="{{ cihaz.marka_model }}"><i class="fas fa-power-off text-danger me-2" style="width: 20px;"></i>Zorla Yeniden Başlat</a></li>
+                    </ul>
+                </div>
+                {% else %}
+                <div class="text-muted small fw-semibold fst-italic"><i class="fas fa-info-circle me-1"></i>Yönetim paneli yok</div>
+                {% endif %}
+
+                <button class="btn btn-light text-danger btn-sm rounded-circle shadow-sm btn-delete" data-id="{{ cihaz.id }}" data-isim="{{ cihaz.marka_model }}" style="width: 35px; height: 35px;" title="Cihazı Envanterden Sil">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#page-title').text('Personel Profili');
+        
+        // IT Management Simulations
+        
+        // 1. Ping
+        $('.action-ping').on('click', function(e) {
+            e.preventDefault();
+            let cihaz = $(this).data('cihaz');
+            Swal.fire({
+                title: 'Ping Gönderiliyor...',
+                text: cihaz + ' cihazına erişim test ediliyor.',
+                timer: 1500,
+                timerProgressBar: true,
+                didOpen: () => { Swal.showLoading() }
+            }).then(() => {
+                Swal.fire('Başarılı!', cihaz + ' cihazı çevrimiçi ve ağa bağlı. (Gecikme: 12ms)', 'success');
+            });
+        });
+
+        // 2. RDP (Uzak Masaüstü)
+        $('.action-rdp').on('click', function(e) {
+            e.preventDefault();
+            let cihaz = $(this).data('cihaz');
+            Swal.fire({
+                title: 'Bağlantı Kuruluyor...',
+                text: cihaz + ' için güvenli uzak masaüstü oturumu başlatılıyor.',
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: () => { Swal.showLoading() }
+            }).then(() => {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Oturum Başlatıldı',
+                    text: cihaz + ' cihazına başarıyla bağlanıldı. Bu bir staj simülasyonudur.',
+                    confirmButtonText: 'Oturumu Kapat'
+                });
+            });
+        });
+        
+        // 3. Donanım Taraması
+        $('.action-hardware').on('click', function(e) {
+            e.preventDefault();
+            let cihaz = $(this).data('cihaz');
+            Swal.fire({
+                title: 'Donanım Bilgileri Çekiliyor',
+                html: 'WMI üzerinden sistem verileri okunuyor...',
+                timer: 2000,
+                didOpen: () => { Swal.showLoading() }
+            }).then(() => {
+                Swal.fire({
+                    title: 'Sistem Raporu: ' + cihaz,
+                    html: `
+                        <div class="text-start mt-3 p-3 bg-light rounded border">
+                            <p class="mb-2"><i class="fas fa-microchip text-primary me-2"></i><strong>İşlemci:</strong> Intel Core i7-12700H (Kullanım: %14)</p>
+                            <p class="mb-2"><i class="fas fa-memory text-success me-2"></i><strong>Bellek (RAM):</strong> 16 GB DDR4 (Kullanım: 6.2 GB)</p>
+                            <p class="mb-2"><i class="fas fa-hdd text-secondary me-2"></i><strong>Disk (C:):</strong> 512 GB NVMe SSD (Boş: 128 GB)</p>
+                            <p class="mb-0"><i class="fas fa-thermometer-half text-danger me-2"></i><strong>Sıcaklık:</strong> 42°C - Normal Seviye</p>
+                        </div>
+                    `,
+                    icon: 'info'
+                });
+            });
+        });
+
+        // 4. Uzaktan Yazılım Yükleme
+        $('.action-software').on('click', async function(e) {
+            e.preventDefault();
+            let cihaz = $(this).data('cihaz');
+            const { value: yazilim } = await Swal.fire({
+                title: 'Uzaktan Yazılım Kurulumu',
+                input: 'select',
+                inputOptions: {
+                    'office': 'Microsoft Office 365 ProPlus',
+                    'antivirus': 'Kaspersky Endpoint Security',
+                    'vpn': 'FortiClient VPN İstemcisi',
+                    'adobe': 'Adobe Acrobat Reader DC',
+                    'chrome': 'Google Chrome (Kurumsal)'
+                },
+                inputPlaceholder: 'Yüklenecek yazılımı seçin',
+                showCancelButton: true,
+                confirmButtonText: 'Kurulumu Başlat',
+                cancelButtonText: 'İptal'
+            });
+
+            if (yazilim) {
+                Swal.fire({
+                    title: 'Kurulum Başlatıldı',
+                    text: 'Seçilen yazılım ' + cihaz + ' arka planında sessiz (silent) olarak yükleniyor...',
+                    icon: 'success'
+                });
+            }
+        });
+
+        // 5. Ekranı Kilitle
+        $('.action-lock').on('click', function(e) {
+            e.preventDefault();
+            let cihaz = $(this).data('cihaz');
+            Swal.fire({
+                title: 'Kilitleniyor...',
+                text: cihaz + ' cihazının ekranı kilitleniyor.',
+                timer: 1000,
+                didOpen: () => { Swal.showLoading() }
+            }).then(() => {
+                Swal.fire('Kilitlendi', 'Kullanıcının aktif oturumu güvenlik amacıyla kilitlendi (Win+L komutu gönderildi).', 'success');
+            });
+        });
+
+        // 6. Mesaj Gönder
+        $('.action-notify').on('click', async function(e) {
+            e.preventDefault();
+            const { value: mesaj } = await Swal.fire({
+                title: 'Kullanıcıya Mesaj Gönder',
+                input: 'textarea',
+                inputLabel: 'Ekranda görünecek uyarı metni:',
+                inputPlaceholder: 'Örn: Lütfen çalışmalarınızı kaydedin, sistem 15 dakika içinde güncellenecektir...',
+                showCancelButton: true,
+                confirmButtonText: 'Gönder',
+                cancelButtonText: 'İptal'
+            });
+            if (mesaj) {
+                Swal.fire('Gönderildi!', 'Mesaj, kullanıcının cihaz ekranına başarıyla yansıtıldı.', 'success');
+            }
+        });
+
+        // 5. Yeniden Başlat
+        $('.action-restart').on('click', function(e) {
+            e.preventDefault();
+            let cihaz = $(this).data('cihaz');
+            Swal.fire({
+                title: 'Yeniden Başlat',
+                text: cihaz + ' cihazını zorla yeniden başlatmak istediğinize emin misiniz? Kullanıcının kaydedilmemiş verileri kaybolabilir.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#64748B',
+                confirmButtonText: 'Evet, Başlat!',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire('Komut İletildi', cihaz + ' cihazına yeniden başlatma komutu gönderildi.', 'success');
+                }
+            });
+        });
+        
+        // SweetAlert2 for Delete Confirmation
+        $('.btn-delete').on('click', function(e) {
+            e.preventDefault();
+            var cihazId = $(this).data('id');
+            var cihazIsim = $(this).data('isim');
+            
+            Swal.fire({
+                title: 'Emin misiniz?',
+                html: "<b>" + cihazIsim + "</b> cihazını personelden silmek üzeresiniz.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#EF4444',
+                cancelButtonColor: '#64748B',
+                confirmButtonText: 'Evet, Sil!',
+                cancelButtonText: 'İptal',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'btn btn-danger mx-2',
+                    cancelButton: 'btn btn-secondary mx-2'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/sil/' + cihazId;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

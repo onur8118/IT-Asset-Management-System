@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-4 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-key text-warning me-2"></i> Yazılım Lisansları</h5>
+        <button class="btn btn-warning text-dark rounded-pill btn-sm fw-bold" onclick="addLicense()"><i class="fas fa-plus me-1"></i> Yeni Lisans</button>
+    </div>
+    <div class="card-body px-4 pb-4">
+        <div class="table-responsive">
+            <table class="table align-middle table-borderless" id="lisansTable" style="width:100%">
+                <thead style="border-bottom: 2px solid #E2E8F0;">
+                    <tr>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Yazılım</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Atanan Kullanıcı / Departman</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Kullanım (Adet)</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Bitiş Tarihi</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Durum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for l in lisanslar %}
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td>
+                            <div class="fw-bold text-dark">{{ l.yazilim }}</div>
+                            <div class="small text-muted font-monospace">{{ l.anahtar }}</div>
+                        </td>
+                        <td class="fw-semibold">{{ l.kullanici }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2 fw-bold">{{ l.adet|int - l.kalan|int }} / {{ l.adet }}</span>
+                                <div class="progress flex-grow-1" style="height: 8px;">
+                                    {% set oran = ((l.adet|int - l.kalan|int) / l.adet|int) * 100 %}
+                                    <div class="progress-bar {% if oran > 90 %}bg-danger{% else %}bg-success{% endif %}" role="progressbar" style="width: {{ oran }}%;"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="fw-semibold">{{ l.bitis }}</td>
+                        <td>
+                            {% if l.durum == 'Aktif' %}<span class="badge-soft-success">Aktif</span>
+                            {% elif l.durum == 'Kritik' %}<span class="badge-soft-danger">Kapasite Dolu</span>
+                            {% else %}<span class="badge-soft-warning">Süresi Yaklaşıyor</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#page-title').text('Lisans Yönetimi');
+        $('.nav-link[href="/lisanslar"]').addClass('active');
+        $('#lisansTable').DataTable({
+            language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json' },
+            dom: '<"d-flex justify-content-between align-items-center mb-3"f l>rt<"d-flex justify-content-between align-items-center mt-3"i p>'
+        });
+    });
+
+    function addLicense() {
+        Swal.fire({
+            title: 'Yeni Lisans Ekle',
+            html: `
+                <input id="swal-input1" class="swal2-input" placeholder="Yazılım Adı (Örn: Office 365)">
+                <input id="swal-input2" class="swal2-input" placeholder="Lisans Anahtarı">
+                <input id="swal-input3" class="swal2-input" type="number" placeholder="Kapasite (Kullanıcı Sayısı)">
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Kaydet',
+            cancelButtonText: 'İptal',
+            confirmButtonColor: '#f59e0b',
+            preConfirm: () => {
+                return {
+                    yazilim: document.getElementById('swal-input1').value,
+                    anahtar: document.getElementById('swal-input2').value,
+                    adet: document.getElementById('swal-input3').value || 1
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/add_license', result.value, function(res) {
+                    if(res.success) {
+                        Swal.fire('Başarılı!', 'Yeni lisans sisteme kaydedildi.', 'success').then(() => location.reload());
+                    }
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}

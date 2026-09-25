@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-4">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-book text-info me-2"></i> IT Bilgi Bankası (Knowledge Base)</h5>
+    </div>
+    <div class="card-body p-4">
+        <div class="accordion shadow-sm" id="kbAccordion">
+            <div class="accordion-item border-0 mb-3 rounded">
+                <h2 class="accordion-header"><button class="accordion-button fw-bold bg-light rounded" type="button" data-bs-toggle="collapse" data-bs-toggle="collapse" data-bs-target="#c1">Yeni Personel Mail Kurulumu Nasıl Yapılır?</button></h2>
+                <div id="c1" class="accordion-collapse collapse show" data-bs-parent="#kbAccordion">
+                    <div class="accordion-body text-muted">Exchange Server üzerinden yeni kullanıcı oluşturulur. İlgili gruba (Üretim, İK vb.) atanır ve geçici şifre iletilir. Sonrasında MFA (İki Adımlı Doğrulama) aktif edilir.</div>
+                </div>
+            </div>
+            <div class="accordion-item border-0 mb-3 rounded">
+                <h2 class="accordion-header"><button class="accordion-button collapsed fw-bold bg-light rounded" type="button" data-bs-toggle="collapse" data-bs-target="#c2">Yazıcı (Printer) Ağa Nasıl Dahil Edilir?</button></h2>
+                <div id="c2" class="accordion-collapse collapse" data-bs-parent="#kbAccordion">
+                    <div class="accordion-body text-muted">Statik IP havuzundan (192.168.1.50-70) boş bir IP seçilir. Yazıcı menüsünden IPv4 ayarlarına girilip IP sabitlenir. Print Server'a yeni port açılarak eklenir.</div>
+                </div>
+            </div>
+            <div class="accordion-item border-0 mb-3 rounded">
+                <h2 class="accordion-header"><button class="accordion-button collapsed fw-bold bg-light rounded" type="button" data-bs-toggle="collapse" data-bs-target="#c3">Zimmet Fişi Teslim Süreci</button></h2>
+                <div id="c3" class="accordion-collapse collapse" data-bs-parent="#kbAccordion">
+                    <div class="accordion-body text-muted">Kullanıcıya cihaz teslim edilmeden önce IT Asset Manager portalından zimmet kaydı açılır. PDF raporu çıktı alınarak ıslak imza attırılır ve İnsan Kaynakları departmanına gönderilir.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#page-title').text('Bilgi Bankası');
+        $('.nav-link[href="/wiki"]').addClass('active');
+    });
+</script>
+{% endblock %}

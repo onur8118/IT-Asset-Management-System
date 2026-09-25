@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="col-md-7 text-center fade-in">
+        <div class="mb-4">
+            <div class="bg-{{ color }} text-white rounded-circle d-inline-flex justify-content-center align-items-center shadow-lg" style="width: 100px; height: 100px; font-size: 40px; background: linear-gradient(135deg, var(--{{ color }}) 0%, var(--{{ color }}-dark, #1E293B) 100%);">
+                <i class="fas {{ icon }}"></i>
+            </div>
+        </div>
+        <h2 class="fw-bolder text-dark mb-3">{{ title }}</h2>
+        <div class="card border-0 shadow-sm bg-light p-4 mb-4" style="border-radius: 1rem;">
+            <p class="text-muted mb-0 fw-semibold" style="font-size: 1.1rem;">
+                Bu modül staj projenizin <span class="text-primary fw-bold">Gelecek Sürümleri (Faz-2)</span> için rezerve edilmiştir. Arayüz ve veritabanı altyapısı test aşamasındadır.
+            </p>
+        </div>
+        <a href="/" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm fw-bold"><i class="fas fa-arrow-left me-2"></i> Gösterge Paneline Dön</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#page-title').text('{{ title }}');
+        
+        $('.nav-link').removeClass('active');
+        let path = window.location.pathname;
+        $('.nav-link[href="'+path+'"]').addClass('active');
+    });
+</script>
+{% endblock %}

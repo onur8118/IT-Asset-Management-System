@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-4 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-history text-secondary me-2"></i> Sistem İşlem Logları</h5>
+        <button class="btn btn-outline-secondary rounded-pill btn-sm fw-bold" onclick="showFilter()"><i class="fas fa-filter me-1"></i> Filtrele</button>
+    </div>
+    <div class="card-body px-4 pb-4">
+        <div class="table-responsive">
+            <table class="table align-middle table-borderless table-striped table-hover" id="logTable" style="width:100%">
+                <thead style="border-bottom: 2px solid #E2E8F0;">
+                    <tr>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Tarih / Saat</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">İşlem Tipi</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Kullanıcı (Yetkili)</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Açıklama / Detay</th>
+                        <th class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">IP Adresi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for l in logs %}
+                    <tr>
+                        <td class="fw-semibold text-dark" style="font-size: 0.9rem;">{{ l.tarih }}</td>
+                        <td>
+                            {% if l.islem == 'YENİ ZİMMET' %}<span class="badge bg-primary px-2">YENİ ZİMMET</span>
+                            {% elif l.islem == 'SİSTEM AYARI' %}<span class="badge bg-warning text-dark px-2">AYAR DEĞİŞİKLİĞİ</span>
+                            {% elif l.islem == 'SİLME' %}<span class="badge bg-danger px-2">SİLME (İPTAL)</span>
+                            {% else %}<span class="badge bg-secondary px-2">{{ l.islem }}</span>{% endif %}
+                        </td>
+                        <td class="fw-bold text-muted" style="font-size: 0.9rem;"><i class="fas fa-user-shield me-1"></i> {{ l.kullanici }}</td>
+                        <td class="text-muted" style="font-size: 0.9rem;">{{ l.detay }}</td>
+                        <td class="font-monospace text-muted small">{{ l.ip }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#page-title').text('Zimmet & Sistem Geçmişi');
+        $('.nav-link[href="/log"]').addClass('active');
+        $('#logTable').DataTable({
+            language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json' },
+            pageLength: 25,
+            ordering: false,
+            dom: '<"d-flex justify-content-between align-items-center mb-3"f l>rt<"d-flex justify-content-between align-items-center mt-3"i p>'
+        });
+    });
+
+    function showFilter() {
+        Swal.fire({
+            title: 'Log Filtrele',
+            input: 'select',
+            inputOptions: {
+                '': 'Tüm İşlemler',
+                'YENİ ZİMMET': 'Yeni Zimmet',
+                'SİLME': 'Silme (İptal)',
+                'GİRİŞ': 'Giriş',
+                'SİSTEM AYARI': 'Sistem Ayarı',
+                'YAZILIM GÜNCELLEME': 'Yazılım Güncelleme'
+            },
+            inputPlaceholder: 'İşlem Tipi Seçin',
+            showCancelButton: true,
+            confirmButtonText: 'Filtrele',
+            cancelButtonText: 'İptal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let val = result.value;
+                let table = $('#logTable').DataTable();
+                table.column(1).search(val).draw();
+                
+                if(val) {
+                    Swal.fire('Filtrelendi', 'Sadece "' + val + '" işlemleri listeleniyor.', 'success');
+                } else {
+                    Swal.fire('Sıfırlandı', 'Tüm işlemler listeleniyor.', 'info');
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

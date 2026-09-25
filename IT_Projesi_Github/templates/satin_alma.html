@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <!-- Satin Alma -->
+    <div class="col-12 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-4 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-file-invoice-dollar text-success me-2"></i> Satın Alma ve Faturalar</h5>
+                <button class="btn btn-success rounded-pill btn-sm fw-bold" onclick="addFatura()"><i class="fas fa-plus me-1"></i> Yeni Fatura / Alım</button>
+            </div>
+            <div class="card-body px-4 pb-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle" id="faturaTable">
+                        <thead><tr><th>Tarih</th><th>Tedarikçi</th><th>Açıklama</th><th>Tutar</th><th>Fatura (PDF)</th></tr></thead>
+                        <tbody>
+                            {% for f in faturalar %}
+                            <tr>
+                                <td>{{ f.tarih }}</td>
+                                <td>{{ f.tedarikci }}</td>
+                                <td>{{ f.aciklama }}</td>
+                                <td class="fw-bold text-danger">{{ f.tutar }}</td>
+                                <td><button class="btn btn-sm btn-light text-danger fw-bold" onclick="downloadPDF('{{ f.tedarikci }}', '{{ f.aciklama }}', '{{ f.tutar }}', '{{ f.tarih }}')"><i class="fas fa-file-pdf"></i> İndir</button></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#page-title').text('Satın Alma & Finans');
+        $('.nav-link[href="/satin-alma"]').addClass('active');
+        $('#faturaTable').DataTable({
+            language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json' },
+            dom: '<"d-flex justify-content-between align-items-center mb-3"f l>rt<"d-flex justify-content-between align-items-center mt-3"i p>'
+        });
+    });
+
+    function downloadPDF(vendor, aciklama, tutar, tarih) {
+        Swal.fire({
+            title: 'E-Fatura Oluşturuluyor',
+            html: `<b>${vendor}</b> firmasına ait resmi e-Fatura görüntüye dökülüyor...`,
+            timer: 2000,
+            timerProgressBar: true,
+            didOpen: () => { Swal.showLoading() }
+        }).then(() => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Türkçe karakterleri İngilizce karakterlere çeviren yardımcı fonksiyon
+            const tr2en = (text) => {
+                return text.replace(/Ğ/g, 'G').replace(/ğ/g, 'g')
+                           .replace(/Ü/g, 'U').replace(/ü/g, 'u')
+                           .replace(/Ş/g, 'S').replace(/ş/g, 's')
+                           .replace(/İ/g, 'I').replace(/ı/g, 'i')
+                           .replace(/Ö/g, 'O').replace(/ö/g, 'o')
+                           .replace(/Ç/g, 'C').replace(/ç/g, 'c');
+            };
+            
+            vendor = tr2en(vendor);
+            aciklama = tr2en(aciklama);
+            
+            // Üst Kısım (Header)
+            doc.setFontSize(24);
+            doc.setTextColor(33, 37, 41);
+            doc.text("e-FATURA", 105, 20, { align: 'center' });
+            
+            doc.setDrawColor(200);
+            doc.line(15, 25, 195, 25);
+            
+            // Fatura & Gönderici Bilgileri
+            doc.setFontSize(10);
+            doc.text("FATURA NO: " + "GIB" + Math.floor(Math.random()*900000+100000) + "2026", 15, 35);
+            doc.text("TARIH: " + tarih, 15, 42);
+            doc.text("SAAT: 14:30:00", 15, 49);
+            
+            doc.setFontSize(11);
+            doc.setTextColor(0, 102, 204);
+            doc.text("SAYIN;", 120, 35);
+            doc.setTextColor(33, 37, 41);
+            doc.setFontSize(10);
+            doc.text("SCHMID PEKINTAS ENERJI SAN. VE TIC. A.S.", 120, 42);
+            doc.text("Vergi Dairesi: Duzce VD.", 120, 49);
+            doc.text("VKN: 1234567890", 120, 56);
+            
+            doc.setFontSize(11);
+            doc.setTextColor(0, 102, 204);
+            doc.text("TEDARIKCI;", 15, 65);
+            doc.setTextColor(33, 37, 41);
+            doc.setFontSize(10);
+            doc.text(vendor + " Bilisim Teknolojileri A.S.", 15, 72);
+            doc.text("Vergi Dairesi: Kurumlar VD.", 15, 79);
+            doc.text("VKN: 0987654321", 15, 86);
+            
+            // Tablo Alanı (AutoTable)
+            let rawTutar = parseFloat(tutar.replace(/\./g,'').replace(' TL','').replace(',', '.'));
+            if(isNaN(rawTutar)) rawTutar = Math.floor(Math.random()*50000) + 1000;
+            let kdv = rawTutar * 0.20;
+            let araToplam = rawTutar - kdv;
+            
+            doc.autoTable({
+                startY: 100,
+                headStyles: { fillColor: [0, 102, 204], textColor: 255 },
+                bodyStyles: { textColor: 50 },
+                head: [['Sira', 'Hizmet / Urun Aciklamasi', 'Miktar', 'Birim', 'Birim Fiyat', 'Tutar (TL)']],
+                body: [
+                    ['1', aciklama, '1', 'Adet', araToplam.toLocaleString('tr-TR') + ' TL', araToplam.toLocaleString('tr-TR') + ' TL']
+                ],
+            });
+            
+            let finalY = doc.lastAutoTable.finalY + 10;
+            
+            // Alt Kısım (Toplamlar)
+            doc.setFontSize(10);
+            doc.text("Ara Toplam:", 120, finalY);
+            doc.text(araToplam.toLocaleString('tr-TR') + " TL", 165, finalY);
+            
+            doc.text("Hesaplanan KDV (%20):", 120, finalY + 7);
+            doc.text(kdv.toLocaleString('tr-TR') + " TL", 165, finalY + 7);
+            
+            doc.setDrawColor(0);
+            doc.line(120, finalY + 10, 195, finalY + 10);
+            
+            doc.setFontSize(12);
+            doc.setTextColor(220, 53, 69);
+            doc.text("GENEL TOPLAM:", 120, finalY + 17);
+            doc.text(rawTutar.toLocaleString('tr-TR') + " TL", 165, finalY + 17);
+            
+            // Footer
+            doc.setTextColor(150);
+            doc.setFontSize(9);
+            doc.text("Bu fatura e-Fatura sistemi uzerinden elektronik olarak olusturulmustur. (Staj Projesi Demo)", 105, 280, { align: 'center' });
+            
+            doc.save(vendor.replace(/\s+/g, '_') + '_eFatura.pdf');
+            
+            const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+            Toast.fire({ icon: 'success', title: 'e-Fatura başarıyla indirildi!' });
+        });
+    }
+
+    function addFatura() {
+        Swal.fire({
+            title: 'Yeni Fatura / Alım Gir',
+            html: `
+                <input id="fa-tedarikci" class="swal2-input" placeholder="Tedarikçi Firma (Örn: Vatan, İtopya)">
+                <input id="fa-aciklama" class="swal2-input" placeholder="Alınan Ürünler / Açıklama">
+                <input id="fa-tutar" type="number" class="swal2-input" placeholder="Toplam Tutar (TL)">
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Faturayı İşle',
+            cancelButtonText: 'İptal',
+            confirmButtonColor: '#10b981',
+            preConfirm: () => {
+                if(!document.getElementById('fa-tedarikci').value || !document.getElementById('fa-tutar').value) {
+                    Swal.showValidationMessage('Tedarikçi ve tutar zorunludur!');
+                }
+                return {
+                    tedarikci: document.getElementById('fa-tedarikci').value,
+                    aciklama: document.getElementById('fa-aciklama').value || 'Muhtelif IT Malzemesi',
+                    tutar: document.getElementById('fa-tutar').value
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('/add_fatura', result.value, function(res) {
+                    Swal.fire('Başarılı', 'Fatura sisteme kaydedildi.', 'success').then(() => location.reload());
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <!-- Reports Summary Card -->
+    <div class="col-xl-4 col-lg-5 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-4">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-chart-pie text-success me-2"></i> Envanter Özeti</h5>
+            </div>
+            <div class="card-body d-flex flex-column justify-content-center align-items-center p-5">
+                <div class="bg-light rounded-circle d-flex justify-content-center align-items-center mb-4" style="width: 120px; height: 120px; border: 5px solid var(--success);">
+                    <h2 class="mb-0 fw-bolder text-success">{{ toplam_cihaz }}</h2>
+                </div>
+                <h5 class="fw-bold text-dark mb-1">Toplam Aktif Cihaz</h5>
+                <p class="text-muted text-center small mb-0">Veritabanında kayıtlı tüm zimmetli donanımlar.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Actions Card -->
+    <div class="col-xl-8 col-lg-7 mb-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-4">
+                <h5 class="mb-0 fw-bold"><i class="fas fa-download text-primary me-2"></i> Rapor Oluştur & İndir</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <!-- Excel Export -->
+                    <div class="col-md-6">
+                        <a href="/export/excel" class="text-decoration-none">
+                            <div class="p-4 border rounded bg-light text-center h-100 hover-elevate transition-all">
+                                <i class="fas fa-file-excel text-success mb-3" style="font-size: 3rem;"></i>
+                                <h5 class="fw-bold text-dark">Excel Raporu</h5>
+                                <p class="text-muted small mb-0">Tüm cihazları detaylı Excel tablosu olarak dışa aktar.</p>
+                            </div>
+                        </a>
+                    </div>
+                    <!-- PDF Export -->
+                    <div class="col-md-6">
+                        <a href="/export/pdf" target="_blank" class="text-decoration-none">
+                            <div class="p-4 border rounded bg-light text-center h-100 hover-elevate transition-all">
+                                <i class="fas fa-file-pdf text-danger mb-3" style="font-size: 3rem;"></i>
+                                <h5 class="fw-bold text-dark">PDF Raporu</h5>
+                                <p class="text-muted small mb-0">Yöneticiler için özet PDF dökümü oluştur.</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                <h6 class="fw-bold text-dark mb-3">Zamanlanmış Raporlar</h6>
+                <div class="d-flex align-items-center p-3 border rounded bg-white">
+                    <i class="fas fa-envelope text-warning fs-4 me-3"></i>
+                    <div>
+                        <div class="fw-bold text-dark">Haftalık Yönetim Özeti</div>
+                        <div class="small text-muted">Her Cuma saat 17:00'da IT Müdürüne gönderilir.</div>
+                    </div>
+                    <div class="ms-auto">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" checked>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-elevate:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        border-color: var(--primary) !important;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#page-title').text('Envanter Raporları');
+        $('.nav-link[href="/raporlar"]').addClass('active');
+    });
+</script>
+{% endblock %}

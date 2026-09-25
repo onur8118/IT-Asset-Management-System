@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>IT Envanter Raporu</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; color: #333; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0056b3; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { margin: 0; color: #0056b3; font-size: 24px; }
+        .header p { margin: 5px 0 0 0; font-size: 14px; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f8f9fa; color: #333; font-weight: bold; text-transform: uppercase; font-size: 12px; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #ddd; padding-top: 20px; }
+        @media print {
+            body { margin: 0; padding: 20px; }
+            button { display: none; }
+        }
+    </style>
+</head>
+<body onload="setTimeout(function() { window.print(); }, 500);">
+    <div class="header">
+        <div>
+            <h1>IT Departmanı - Cihaz Envanter Raporu</h1>
+            <p>Bu rapor sistemdeki tüm aktif cihaz zimmetlerini içermektedir.</p>
+        </div>
+        <div style="text-align: right;">
+            <strong>Tarih:</strong> <span id="tarih"></span><br>
+            <strong>Yetkili:</strong> Stajyer Admin
+        </div>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Zimmetli Personel</th>
+                <th>Departman / Ofis</th>
+                <th>Cihaz Kategorisi</th>
+                <th>Marka & Model</th>
+                <th>Barkod No</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in cihazlar %}
+            <tr>
+                <td>{{ c.id }}</td>
+                <td><strong>{{ c.personel_ad_soyad }}</strong></td>
+                <td>{{ c.lokasyon_ofis }}</td>
+                <td>{{ c.kategori }}</td>
+                <td>{{ c.marka_model }}</td>
+                <td style="font-family: monospace;">{{ c.barkod_no }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="footer">
+        Bu belge IT Asset Management Sistemi tarafından otomatik olarak oluşturulmuştur.
+    </div>
+
+    <script>
+        document.getElementById('tarih').innerText = new Date().toLocaleString('tr-TR');
+    </script>
+</body>
+</html>

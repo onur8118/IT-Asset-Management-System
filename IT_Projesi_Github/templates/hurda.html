@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-dark text-white py-4">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-recycle text-success me-2"></i> Elektronik Atık (Hurda) Deposu</h5>
+    </div>
+    <div class="card-body p-4">
+        <div class="alert alert-success border-0 shadow-sm mb-4 fw-bold">
+            <i class="fas fa-leaf me-2"></i> Green IT Vizyonu: Bu yıl geri dönüşüme gönderilen cihazlar sayesinde doğaya katkımız takip edilmektedir.
+        </div>
+        <table class="table table-hover align-middle">
+            <thead><tr><th>Hurda Kodu</th><th>Cihaz</th><th>Ayrılma Tarihi</th><th>Sebep</th><th>Geri Dönüşüm Durumu</th></tr></thead>
+            <tbody>
+                <tr><td class="font-monospace text-muted">HRD-2026-001</td><td class="fw-bold">Eski Nesil HP Yazıcı</td><td>01.09.2026</td><td>Anakart Arızası, Parça Bulunamadı</td><td><span class="badge bg-success">Lisanslı Firmaya Teslim Edildi</span></td></tr>
+                <tr><td class="font-monospace text-muted">HRD-2026-002</td><td class="fw-bold">Kırık Monitör (Philips)</td><td>25.08.2026</td><td>Ekran paneli kırıldı</td><td><span class="badge bg-warning text-dark">Depoda Bekliyor</span></td></tr>
+                <tr><td class="font-monospace text-muted">HRD-2026-003</td><td class="fw-bold">Bozuk Switch (Aruba)</td><td>10.08.2026</td><td>Yıldırım düşmesi, güç kaynağı yandı</td><td><span class="badge bg-success">Lisanslı Firmaya Teslim Edildi</span></td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#page-title').text('Elektronik Atık (Hurda)');
+        $('.nav-link[href="/hurda"]').addClass('active');
+    });
+</script>
+{% endblock %}

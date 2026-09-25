@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/" class="btn btn-sm mb-3" style="background: #E2E8F0; color: #475569; border-radius: 8px; font-weight: 600;">
+        <i class="fas fa-arrow-left me-1"></i> Panele Dön
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card border-0 shadow-sm" style="border-radius: 1.5rem; overflow: hidden;">
+            <div class="card-header border-0 py-4" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);">
+                <h4 class="mb-0 text-white fw-bolder d-flex align-items-center">
+                    <div class="bg-white text-primary rounded-circle d-flex justify-content-center align-items-center me-3" style="width: 45px; height: 45px;">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    Yeni Zimmet Kaydı
+                </h4>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form method="POST" action="/ekle" id="cihazForm">
+                    
+                    <div class="row">
+                        <!-- Left Column: User Details -->
+                        <div class="col-md-6 border-end pe-4">
+                            <h5 class="text-dark fw-bold mb-3">Personel Bilgileri</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Personel Ad Soyad</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-user"></i></span>
+                                    <input type="text" name="personel_ad_soyad" class="form-control" placeholder="Örn: Onur (Stajyer)" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Şirket / Kurum</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-building"></i></span>
+                                    <select name="sirket" class="form-select">
+                                        <option value="SCH">SCH (Schmid Pekintaş)</option>
+                                        <option value="ALU">ALU (Aluform)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Departman / Ofis</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-door-open"></i></span>
+                                    <input type="text" name="lokasyon_ofis" class="form-control" placeholder="Örn: Bilgi İşlem">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Device Details -->
+                        <div class="col-md-6 ps-4">
+                            <h5 class="text-dark fw-bold mb-3">Cihaz Detayları</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Kategori Seçimi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light text-primary"><i class="fas fa-tags"></i></span>
+                                    <select name="kategori" id="kategoriSecim" class="form-select fw-bold text-primary" required>
+                                        <option value="" disabled selected>Lütfen Kategori Seçin...</option>
+                                        <option value="Laptop">Laptop / Dizüstü</option>
+                                        <option value="Masaüstü">Masaüstü Kasa</option>
+                                        <option value="Monitör">Monitör</option>
+                                        <option value="Cep Telefonu">Cep Telefonu (Kurumsal)</option>
+                                        <option value="Masa Telefonu">Masa Telefonu (IP)</option>
+                                        <option value="Klavye/Fare">Klavye & Fare Seti</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Barkod No</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-barcode"></i></span>
+                                    <input type="text" name="barkod_no" class="form-control" placeholder="Demirbaş No" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-muted small fw-bold">Marka & Model</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-laptop-code"></i></span>
+                                    <input type="text" name="marka_model" id="markaInput" class="form-control" placeholder="Örn: DELL VOSTRO" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <!-- Dynamic Fields Section -->
+                    <h5 class="text-dark fw-bold mb-3"><i class="fas fa-cogs text-primary me-2"></i> Ekstra Teknik Bilgiler</h5>
+                    
+                    <div class="row bg-light p-3 rounded dynamic-container">
+                        <div class="col-12 text-center text-muted" id="placeholderMsg">
+                            <em>Lütfen önce yukarıdan bir Cihaz Kategorisi seçin. Ekstra bilgiler buraya gelecektir.</em>
+                        </div>
+
+                        <!-- Network Fields (For PC/Laptop/IP Phone) -->
+                        <div class="col-md-6 mb-3 dynamic-field field-network">
+                            <label class="form-label text-muted small fw-bold">IP Adresi</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-network-wired text-success"></i></span>
+                                <input type="text" name="ip_adresi" class="form-control" placeholder="192.168.x.x">
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3 dynamic-field field-network">
+                            <label class="form-label text-muted small fw-bold">MAC Adresi</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-microchip text-secondary"></i></span>
+                                <input type="text" name="mac_adresi" class="form-control" placeholder="00:1A:2B:...">
+                            </div>
+                        </div>
+                        
+                        <!-- Extra Note (Always available but changes placeholder) -->
+                        <div class="col-12 mb-3 dynamic-field field-all">
+                            <label class="form-label text-muted small fw-bold" id="notlarLabel">Ek Notlar</label>
+                            <textarea name="notlar" id="notlarInput" class="form-control" rows="2" placeholder="Cihaz durumu veya ekstra donanımlar..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="text-end mt-5 pt-3 border-top">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm"><i class="fas fa-save me-2"></i> Sisteme Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('.nav-link[href="/ekle"]').addClass('active');
+
+        // Dynamic Form Logic
+        $('#kategoriSecim').change(function() {
+            var cat = $(this).val();
+            
+            // Hide all first
+            $('.dynamic-field').hide();
+            $('#placeholderMsg').hide();
+            
+            // Show base fields
+            $('.field-all').show();
+            $('#markaInput').attr('placeholder', 'Marka & Model giriniz');
+            $('#notlarInput').attr('placeholder', 'Cihaz hakkında ek notlar...');
+
+            if (cat === 'Laptop' || cat === 'Masaüstü') {
+                $('.field-network').show().hide().fadeIn(300);
+                $('#notlarLabel').text('İşletim Sistemi / Ek Notlar');
+                $('#markaInput').attr('placeholder', 'Örn: DELL, LENOVO, HP');
+            } 
+            else if (cat === 'Masa Telefonu') {
+                $('.field-network').show().hide().fadeIn(300);
+                $('#notlarLabel').text('Dahili Numara');
+                $('#notlarInput').attr('placeholder', 'Örn: Dahili: 145');
+                $('#markaInput').attr('placeholder', 'Örn: Cisco, Avaya, Yealink');
+            }
+            else if (cat === 'Cep Telefonu') {
+                $('#notlarLabel').text('Telefon Numarası / IMEI');
+                $('#notlarInput').attr('placeholder', 'Örn: 05xx xxx xx xx / IMEI: 35xxxxx');
+                $('#markaInput').attr('placeholder', 'Örn: iPhone 16 Pro, Samsung S24');
+            }
+            else if (cat === 'Monitör') {
+                $('#notlarLabel').text('Ekran Boyutu / Çözünürlük');
+                $('#notlarInput').attr('placeholder', 'Örn: 24 inç, 144Hz');
+                $('#markaInput').attr('placeholder', 'Örn: ASUS, DELL, ViewSonic');
+            }
+            else if (cat === 'Klavye/Fare') {
+                $('#notlarLabel').text('Bağlantı Tipi');
+                $('#notlarInput').attr('placeholder', 'Örn: Kablosuz USB / Bluetooth');
+                $('#markaInput').attr('placeholder', 'Örn: Logitech MK220, Everest');
+            }
+        });
+    });
+</script>
+{% endblock %}

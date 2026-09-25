@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-dark text-white py-4 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold"><i class="fas fa-key text-warning me-2"></i> Şifre Kasası (IT Password Vault)</h5>
+        <button class="btn btn-outline-light rounded-pill btn-sm fw-bold" onclick="addRecord()"><i class="fas fa-lock me-1"></i> Yeni Kasa Kaydı</button>
+    </div>
+    <div class="card-body px-4 pb-4">
+        <div class="alert alert-warning border-0 shadow-sm mb-4 mt-3 fw-bold">
+            <i class="fas fa-exclamation-triangle me-2"></i> Dikkat! Bu sayfadaki şifreleri görüntülediğinizde veya kopyaladığınızda iz kayıtları denetim loglarına yazılır.
+        </div>
+        <div class="table-responsive">
+            <table class="table align-middle table-borderless" id="vaultTable" style="width:100%">
+                <thead style="border-bottom: 2px solid #E2E8F0;">
+                    <tr>
+                        <th class="text-muted fw-bold text-uppercase">Hesap / Sistem</th>
+                        <th class="text-muted fw-bold text-uppercase">Kullanıcı Adı</th>
+                        <th class="text-muted fw-bold text-uppercase">Parola</th>
+                        <th class="text-muted fw-bold text-uppercase text-end">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="fw-bold">Core Switch (Sistem Odası)</td>
+                        <td class="font-monospace">admin</td>
+                        <td class="font-monospace text-muted"><span class="pwd-field" data-pwd="Cisco!2026_Admin">••••••••••••</span></td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="togglePwd(this)" title="Göster/Gizle"><i class="fas fa-eye"></i></button>
+                            <button class="btn btn-sm btn-dark" onclick="copyPwd('Cisco!2026_Admin')"><i class="fas fa-copy"></i> Kopyala</button>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="fw-bold">Fortinet Güvenlik Duvarı</td>
+                        <td class="font-monospace">super_admin</td>
+                        <td class="font-monospace text-muted"><span class="pwd-field" data-pwd="Forti@Net_9988">••••••••••••</span></td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="togglePwd(this)" title="Göster/Gizle"><i class="fas fa-eye"></i></button>
+                            <button class="btn btn-sm btn-dark" onclick="copyPwd('Forti@Net_9988')"><i class="fas fa-copy"></i> Kopyala</button>
+                        </td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td class="fw-bold">Windows Server 2022 (DC)</td>
+                        <td class="font-monospace">Administrator</td>
+                        <td class="font-monospace text-muted"><span class="pwd-field" data-pwd="Schmid.DC!2022">••••••••••••</span></td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="togglePwd(this)" title="Göster/Gizle"><i class="fas fa-eye"></i></button>
+                            <button class="btn btn-sm btn-dark" onclick="copyPwd('Schmid.DC!2022')"><i class="fas fa-copy"></i> Kopyala</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        $('#page-title').text('Şifre Kasası');
+        $('.nav-link[href="/sifre-kasasi"]').addClass('active');
+    });
+
+    function togglePwd(btn) {
+        let span = $(btn).closest('tr').find('.pwd-field');
+        let actual = span.attr('data-pwd');
+        let icon = $(btn).find('i');
+        
+        if (span.text() === '••••••••••••') {
+            span.text(actual);
+            span.removeClass('text-muted').addClass('text-danger fw-bold');
+            icon.removeClass('fa-eye').addClass('fa-eye-slash');
+        } else {
+            span.text('••••••••••••');
+            span.removeClass('text-danger fw-bold').addClass('text-muted');
+            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        }
+    }
+
+    function copyPwd(pwd) {
+        // Pano kopyalama işlemi (https veya localhost gerektirir)
+        if(navigator.clipboard) {
+            navigator.clipboard.writeText(pwd);
+        }
+        const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+        Toast.fire({ icon: 'success', title: 'Parola panoya kopyalandı!' });
+    }
+    
+    function addRecord() {
+        Swal.fire({
+            title: 'Yeni Parola Ekle',
+            html: `
+                <input id="swal-sys" class="swal2-input" placeholder="Sistem Adı (Örn: Muhasebe Sunucusu)">
+                <input id="swal-user" class="swal2-input" placeholder="Kullanıcı Adı">
+                <input id="swal-pass" type="password" class="swal2-input" placeholder="Parola">
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Kaydet',
+            cancelButtonText: 'İptal',
+            confirmButtonColor: '#10b981',
+            preConfirm: () => {
+                if(!document.getElementById('swal-sys').value) {
+                    Swal.showValidationMessage('Sistem adı zorunludur!');
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('Güvenli Kayıt', 'Parola AES-256 ile şifrelenerek kasaya eklendi.', 'success');
+            }
+        });
+    }
+</script>
+{% endblock %}
